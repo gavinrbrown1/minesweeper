@@ -55,7 +55,11 @@ def pull_neighbors(i, j, b):
 def basic_updater(prob_mines, b):
     """do maintanence updates on prob_mines"""
     # note that flagged mines are "officially" still unknown
-    p_base = (b.mines - b.flagged) / (b.unknowns - b.flagged)
+    try:
+        p_base = (b.mines - b.flagged) / (b.unknowns - b.flagged)
+    except ZeroDivisionError:
+        print('Win')
+        return
 
     for i in range(b.rows):
         for j in range(b.cols):
@@ -129,7 +133,7 @@ prob_mines = initialize_prob_mines(my_board)
 
 # first move
 my_board.move(3, 3)
-prob_mines[3][3] = -1
+prob_mines[3][3] = 0
 
 print(my_board)
 
@@ -159,7 +163,7 @@ while True:
 
     moves = player_moves(prob_mines, my_board)
 
-    print('%i safe moves exist' % len(moves))
+    print('%i safe move(s) exist(s)' % len(moves))
     sleep(lag)
 
     if not moves:
