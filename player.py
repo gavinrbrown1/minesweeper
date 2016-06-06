@@ -41,6 +41,7 @@ def pull_neighbors(i, j, b):
 def bomb_finder(prob_mines, b):
     """search for situations where we know p in [0, 1]"""
     # b is board
+    original_prob_mines = prob_mines
 
     # what is the probability for unknown spaces?
     p_base = (b.mines - b.flagged) / (b.unknowns)
@@ -79,6 +80,12 @@ def bomb_finder(prob_mines, b):
                         if n['value'] == b.unknown_icon:
                             if prob_mines[n['i']][n['j']] not in [0, 1]:
                                 prob_mines[n['i']][n['j']] = p
+
+    # recursive calls until prob_mines is stable
+    # (wouldn't have thought of this before)
+    if original_prob_mines != prob_mines:
+        original_prob_mines = prob_mines
+        prob_mines = self.bomb_finder(prob_mines, b)
 
     return(prob_mines)
 
@@ -199,13 +206,6 @@ while no_bombs:
         for j in range(cols):
             if prob_mines[i][j] == 0:
                 no_bombs.append([i, j])
-
-    if my_board.check_win == 'Won':
-        print 'You won!'
-        no_bombs = []
-    elif my_board.check_win == 'Lost':
-        print 'You lost!'
-        no_bombs = []
 
 print(my_board)
 # print_probs(prob_mines)
