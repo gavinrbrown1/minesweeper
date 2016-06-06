@@ -200,5 +200,12 @@ while no_bombs:
             if prob_mines[i][j] == 0:
                 no_bombs.append([i, j])
 
+    if my_board.check_win == 'Won':
+        print 'You won!'
+        no_bombs = []
+    elif my_board.check_win == 'Lost':
+        print 'You lost!'
+        no_bombs = []
+
 print(my_board)
 # print_probs(prob_mines)
