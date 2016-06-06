@@ -180,3 +180,6 @@ while no_bombs:
         for j in cols:
             if prob_mines[i][j] == 0:
                 no_bombs.append([i, j])
+
+print(my_board)
+print_probs(prob_mines)
