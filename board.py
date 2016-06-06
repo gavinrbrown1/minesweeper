@@ -46,9 +46,10 @@ class Board():
                     deltas = [-1, 0, 1]
                     for di in deltas:
                         for dj in deltas:
-                            if i+di>=0 and i+di<rows and j+dj>=0 and j+dj<cols:
-                                if self.board[i+di][j+dj][0] == self.mine_icon:
-                                        total += 1
+                            if di != dj or di != 0:
+                                if i+di>=0 and i+di<rows and j+dj>=0 and j+dj<cols:
+                                    if self.board[i+di][j+dj][0] == self.mine_icon:
+                                            total += 1
                     self.board[i][j][0] = total
 
     def __str__(self):
@@ -70,7 +71,6 @@ class Board():
         # first check for busts
         if self.board[i][j][0] == self.mine_icon:
             self.exploded = True
-            return
 
         # use a queue of all the spots we will reveal
         queue = [[i, j]]
@@ -81,10 +81,11 @@ class Board():
             if self.board[r][c][0] == 0:
                 for di in deltas:
                     for dj in deltas:
-                        if r+di>=0 and r+di<self.rows:
-                            if c+dj>=0 and c+dj<self.cols:
-                                if [r+di, c+dj] not in queue:
-                                    queue.append([r+di, c+dj])
+                        if di != dj or di != 0:
+                            if r+di>=0 and r+di<self.rows:
+                                if c+dj>=0 and c+dj<self.cols:
+                                    if [r+di, c+dj] not in queue:
+                                        queue.append([r+di, c+dj])
             q += 1
 
         for [i, j] in queue:
