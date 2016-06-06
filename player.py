@@ -18,9 +18,11 @@ def initialize_prob_mines(b):
              prob_mines[i].append(p)
     return(prob_mines)
 
+# temporary, only returns safe moves
 def player_moves(prob_mines, b):
     """return list of moves with lowest bomb probability"""
     min_p = 0   # TEMPORARY
+    # min_p = 1 # actual
     moves = []
 
     for i in range(b.rows):
@@ -52,23 +54,24 @@ def pull_neighbors(i, j, b):
 
 def basic_updater(prob_mines, b):
     """do maintanence updates on prob_mines"""
+    # note that flagged mines are "officially" still unknown
     p_base = (b.mines - b.flagged) / (b.unknowns - b.flagged)
 
     for i in range(b.rows):
         for j in range(b.cols):
-            if prob_mines[i][j] not in [-1, 0, 1]:
+            if prob_mines[i][j] not in [0, 1]:
                 label = b.reveal(i, j)
                 if label == b.empty_icon:
-                    prob_mines[i][j] = -1
+                    prob_mines[i][j] = 0
                 elif label in range(10):
-                    prob_mines[i][j] = -1
+                    prob_mines[i][j] = 0
                 elif label == b.unknown_icon:
                     prob_mines[i][j] = p_base
 
     return(prob_mines)
 
 def bomb_finder(prob_mines, b):
-    """search for situations where we know p is 1"""
+    """search for situations where we know p is 1 or 0"""
     changed = False     # track if modifications were made
     original_prob_mines = prob_mines
 
@@ -76,9 +79,10 @@ def bomb_finder(prob_mines, b):
         for j in range(b.cols):
             label = b.reveal(i, j)
             if label in list(range(1, 9)):
-                # then there are be bomb neighbors
-                unknown_neighbors = bomb_neighbors = 0
+                # then there are  bomb neighbors
                 neighbors = pull_neighbors(i, j, b) # list of neighboring spaces
+
+                unknown_neighbors = bomb_neighbors = 0
                 for n in neighbors:
                     if n['label'] == b.unknown_icon:
                         unknown_neighbors += 1
@@ -90,7 +94,7 @@ def bomb_finder(prob_mines, b):
                     for n in neighbors:
                         if n['label'] == b.unknown_icon:
                             prob_mines[n['i']][n['j']] = 0
-                elif label == unknown_neighbors:
+                elif (label - bomb_neighbors) == unknown_neighbors:
                     # then all the unknown neighbors are bombs!
                     for n in neighbors:
                         if n['label'] == b.unknown_icon:
