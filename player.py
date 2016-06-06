@@ -8,21 +8,21 @@ from time import sleep
 
 from board import Board
 
-def player_move(prob_mines, board):
-    """pick a move randomly from lowest probability of mines"""
-    smallest = [1, 0, 0]
-    foo = list(range(board.rows))
-    bar = list(range(board.cols))
+def player_moves(prob_mines, b):
+    """return list of moves with lowest bomb probability"""
+    min_p = 1
+    moves = []
 
-    random.shuffle(foo)
-    random.shuffle(bar)
+    for i in range(b.rows):
+        for j in range(b.cols):
+            p = prob_mines[i][j]
+            if p < min_p:
+                moves = [[i,j]
+                min_p = p
+            elif p == min_p:
+                moves.append([i, j])
 
-    for i in foo:
-        for j in bar:
-            if prob_mines[i][j] < smallest[0]:
-                smallest = [prob_mines[i][j], i, j]
-
-    return [i, j]
+    return moves
 
 def pull_neighbors(i, j, b):
     """function returns a list of neighbors values and their indices"""
@@ -91,10 +91,6 @@ def bomb_finder(prob_mines, b):
 
     return prob_mines
 
-def no_bomb_finder(prob_mines, b):
-    """search for spaces where there is no bomb"""
-    pass
-
 def print_probs(prob_mines):
     for row in prob_mines:
         for p in row:
@@ -102,15 +98,14 @@ def print_probs(prob_mines):
         print()
     print()
 
-
 rows = 8
 cols = rows
 mines = 10
-#
+
 lag = 2     # seconds after printing
-#
+
 my_board = Board(rows, cols, mines)
-#
+
 # generate uniform probabilistic view of minefield
 p = mines / (rows * cols)
 prob_mines = []
@@ -118,9 +113,9 @@ for i in range(rows):
      prob_mines.append([])
      for j in range(cols):
          prob_mines[i].append(p)
-#
-# # pick = player_move(prob_mines, my_board)
-#
+
+# pick = player_move(prob_mines, my_board)
+
 my_board.move(3, 3)
 prob_mines[3][3] = -1
 
@@ -138,17 +133,3 @@ for i in range(my_board.rows):
             sleep(lag)
 
 prob_mines = basic_updater(prob_mines, my_board)
-
-prob_mines = bomb_finder(prob_mines, my_board)
-
-
-for i in range(my_board.rows):
-    for j in range(my_board.cols):
-        if prob_mines[i][j] == 1:
-            my_board.flag(i, j)
-            print(my_board)
-            sleep(lag)
-
-# print(my_board)
-
-print_probs(prob_mines)
