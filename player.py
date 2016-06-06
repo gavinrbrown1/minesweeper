@@ -4,6 +4,7 @@
 #   outputs a choice based on lowest probability of bomb-ness
 
 import random
+from time import sleep
 
 from board import Board
 
@@ -94,23 +95,23 @@ def print_probs(prob_mines):
         print()
     print()
 
-prob_mines = bomb_finder(prob_mines, my_board)
-
-for i in range(my_board.rows):
-    for j in range(my_board.cols):
-        if prob_mines[i][j] == 1:
-            my_board.flag(i, j)
-
-prob_mines = bomb_finder(prob_mines, my_board)
-
-for i in range(my_board.rows):
-    for j in range(my_board.cols):
-        if prob_mines[i][j] == 1:
-            my_board.flag(i, j)
-
-print(my_board)
-
-print_probs(prob_mines)
+# prob_mines = bomb_finder(prob_mines, my_board)
+#
+# for i in range(my_board.rows):
+#     for j in range(my_board.cols):
+#         if prob_mines[i][j] == 1:
+#             my_board.flag(i, j)
+#
+# prob_mines = bomb_finder(prob_mines, my_board)
+#
+# for i in range(my_board.rows):
+#     for j in range(my_board.cols):
+#         if prob_mines[i][j] == 1:
+#             my_board.flag(i, j)
+#
+# print(my_board)
+#
+# print_probs(prob_mines)
 
 # now, the flow of things:
 #     initalize board and make first pick
@@ -125,9 +126,11 @@ print_probs(prob_mines)
 #         find p=0 sites
 #     end
 
-rows = 8
-cols = 8
+rows = 20
+cols = 20
 mines = 10
+
+lag = 1     # seconds after printing
 
 my_board = Board(rows, cols, mines)
 
@@ -144,11 +147,23 @@ for i in range(rows):
 my_board.move(3, 3)
 prob_mines[3][3] = -1
 
+print(my_board)
+sleep(lag)
+
+prob_mines = bomb_finder(prob_mines, my_board)
+
+for i in range(my_board.rows):
+    for j in range(my_board.cols):
+        if prob_mines[i][j] == 1:
+            my_board.flag(i, j)
+            print(my_board)
+            sleep(lag)
+
 prob_mines = bomb_finder(prob_mines, my_board)
 
 no_bombs = []
-for i in rows:
-    for j in cols:
+for i in range(rows):
+    for j in range(cols):
         if prob_mines[i][j] == 0:
             no_bombs.append([i, j])
 
@@ -163,9 +178,11 @@ while no_bombs:
         for j in range(my_board.cols):
             if prob_mines[i][j] == 1:
                 my_board.flag(i, j)
+                print(my_board)
+                sleep(lag)
 
-    for i in rows:
-        for j in cols:
+    for i in range(my_board.rows):
+        for j in range(my_board.cols):
             if prob_mines[i][j] == 0:
                 if [i, j] not in no_bombs:
                     no_bombs.append([i, j])
@@ -173,13 +190,15 @@ while no_bombs:
     for [i, j] in no_bombs:
         my_board.move(i, j)
         prob_mines[i][j] = -1
+        print(my_board)
+        sleep(lag)
 
     prob_mines = bomb_finder(prob_mines, my_board)
     no_bombs = []
-    for i in rows:
-        for j in cols:
+    for i in range(rows):
+        for j in range(cols):
             if prob_mines[i][j] == 0:
                 no_bombs.append([i, j])
 
 print(my_board)
-print_probs(prob_mines)
+# print_probs(prob_mines)

@@ -19,13 +19,14 @@ class Board():
         self.flag_icon = 'F'
 
         # counters
+        self.exploded = False
         self.flagged = 0
         self.unknowns = self.rows * self.cols
 
         # generate mine locations
         positions = [[x//rows, x%cols] for x in sample(range(rows*cols), mines)]
 
-        # each element of the board has two entries: the first is actual
+        # each element of the board has two entries: the first is actual entry
         #   and the second is what the player sees
         # set up and distribute mines
         self.board = []
@@ -66,6 +67,11 @@ class Board():
 
     def move(self, i, j):
         """update the board with the selection at row, col"""
+        # first check for busts
+        if self.board[i][j][0] == self.mine_icon:
+            self.exploded = True
+            return
+
         # use a queue of all the spots we will reveal
         queue = [[i, j]]
         q = 0   # index in the queue
@@ -94,3 +100,12 @@ class Board():
     def reveal(self, i, j):
         """what the player uses to see a single spot"""
         return self.board[i][j][1]
+
+    def check_win(self):
+        """checks end conditions"""
+        if self.exploded:
+            return('Lost')
+        if self.flagged == self.mines and self.unknowns == 0:
+            return('Won')
+        else:
+            return('Continue')
