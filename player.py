@@ -50,7 +50,7 @@ def pull_neighbors(i, j, b):
                     'i': i+di,
                     'j': j+dj
                     })
-    return output
+    return(output)
 
 def basic_updater(prob_mines, b):
     """do maintanence updates on prob_mines"""
