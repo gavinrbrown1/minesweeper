@@ -10,12 +10,12 @@ from board import Board
 
 def initialize_prob_mines(b):
     """return uniform probability estimate"""
-    p = mines / (rows * cols)
+    # p = mines / (rows * cols)
     prob_mines = []
     for i in range(b.rows):
          prob_mines.append([])
          for j in range(b.cols):
-             prob_mines[i].append(p)
+             prob_mines[i].append(0.1)
     return(prob_mines)
 
 # temporary, only returns safe moves
@@ -52,15 +52,17 @@ def pull_neighbors(i, j, b):
                     })
     return(output)
 
-def basic_updater(prob_mines, b):
+def uniform_updater(prob_mines, b):
     """do maintanence updates on prob_mines"""
-    # note that flagged mines are "officially" still unknown
-    try:
-        p_base = (b.mines - b.flagged) / (b.unknowns - b.flagged)
-    except ZeroDivisionError:
-        print('Win')
-        return
+    # assume everything we don't know about has same probability p
+    total_mines = b.mines
 
+    # count places we think are mines
+    for i in range(b.rows):
+        for j in range(b.cols):
+
+
+    # iterate over everything
     for i in range(b.rows):
         for j in range(b.cols):
             if prob_mines[i][j] not in [0, 1]:
@@ -70,13 +72,13 @@ def basic_updater(prob_mines, b):
                 elif label in range(10):
                     prob_mines[i][j] = 0
                 elif label == b.unknown_icon:
-                    prob_mines[i][j] = p_base
+                    prob_mines[i][j] = p
 
     return(prob_mines)
 
 def bomb_finder(prob_mines, b):
     """search for situations where we know p is 1 or 0"""
-    changed = False     # track if modifications were made
+    # changed = False     # track if modifications were made
     original_prob_mines = prob_mines
 
     for i in range(b.rows):
@@ -104,72 +106,26 @@ def bomb_finder(prob_mines, b):
                         if n['label'] == b.unknown_icon:
                             prob_mines[n['i']][n['j']] = 1
 
-    for i in range(b.rows):
-        for j in range(b.cols):
-            if original_prob_mines[i][j] != prob_mines[i][j]:
-                changed = True
-
-    if changed:
-        prob_mines = bomb_finder(prob_mines, b)
+    # for i in range(b.rows):
+    #     for j in range(b.cols):
+    #         if original_prob_mines[i][j] != prob_mines[i][j]:
+    #             changed = True
+    #
+    # if changed:
+    #     prob_mines = bomb_finder(prob_mines, b)
 
     return prob_mines
 
 def print_probs(prob_mines):
     for row in prob_mines:
         for p in row:
-            print('%0.2f' % p, end=' ')
+            print('%0.1f' % p, end=' ')
         print()
     print()
 
-rows = 8
-cols = rows
-mines = 10
+def prob_update(prob_mines, b):
+    """wrapper for regular updates"""
+    prob_mines = uniform_updater(prob_mines, b)
+    prob_mines = bomb_finder(prob_mines, b)
 
-lag = 2     # seconds after printing
-
-my_board = Board(rows, cols, mines)
-
-prob_mines = initialize_prob_mines(my_board)
-
-# first move
-my_board.move(3, 3)
-prob_mines[3][3] = 0
-
-print(my_board)
-
-while True:
-    # initial probabilities
-    prob_mines = basic_updater(prob_mines, my_board)
-    prob_mines = bomb_finder(prob_mines, my_board)
-
-    # start by flagging
-    print('Flagging bombs')
-    sleep(lag)
-    for i in range(my_board.rows):
-        for j in range(my_board.cols):
-            label = my_board.reveal(i, j)
-            if prob_mines[i][j] == 1 and label != my_board.flag_icon:
-                my_board.flag(i, j)
-                print(my_board)
-                sleep(lag)
-
-    # probabilties agains
-    prob_mines = basic_updater(prob_mines, my_board)
-    prob_mines = bomb_finder(prob_mines, my_board)
-
-    # now make moves
-    print('starting to make moves')
-    sleep(lag)
-
-    moves = player_moves(prob_mines, my_board)
-
-    print('%i safe move(s) exist(s)' % len(moves))
-    sleep(lag)
-
-    if not moves:
-        break
-
-    for [i, j] in moves:
-        my_board.move(i, j)
-        print(my_board)
-        sleep(lag)
+    return(prob_mines)
