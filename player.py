@@ -69,8 +69,7 @@ def uniform_updater(prob_mines, b):
     try:
         p = (total_mines - found_mines) / unknowns
     except ZeroDivisionError:
-        print('You won!')
-        return
+        pass
 
 
     # iterate over everything
@@ -148,9 +147,6 @@ def print_probs(prob_mines):
 def prob_update(prob_mines, b):
     """wrapper for regular updates"""
     prob_mines = uniform_updater(prob_mines, b)
-    if prob_mines:
-        prob_mines = bomb_finder(prob_mines, b)
-    else:
-        return
+    prob_mines = bomb_finder(prob_mines, b)
 
     return(prob_mines)

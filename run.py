@@ -1,7 +1,7 @@
 
 # main script
 
-from time import sleep
+from time import sleep, time
 
 from player import initialize_prob_mines, prob_update, player_moves, safe_spaces
 from board import Board
@@ -14,7 +14,7 @@ mines = 10
 
 lag = 2    # seconds after printing
 
-verbose = True
+verbose = False
 
 # setup and first move ########################
 while True:
@@ -34,7 +34,6 @@ if verbose:
     sleep(lag)
 
 # gameplay ########################
-
 
 while True:
     # initial probabilities
@@ -70,6 +69,8 @@ while True:
             label = my_board.reveal(i, j)
             if prob_mines[i][j] == 0 and label == my_board.unknown_icon:
                 my_board.move(i, j)
+                if my_board.reveal(i, j) == my_board.mine_icon:
+                    print('fuck')
                 if verbose:
                     print(my_board)
                     sleep(lag)
@@ -78,5 +79,5 @@ while True:
 
     if not made_moves:
         if verbose:
-            print('No moves to make')
+            print('No safe moves to make')
         break
