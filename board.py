@@ -74,9 +74,6 @@ class Board():
 
     def move(self, i, j):
         """update the board with the selection at row, col"""
-        # first check for busts
-        if self.board[i][j][0] == self.mine_icon:
-            self.exploded = True
 
         # use a queue of all the spots we will reveal
         queue = [[i, j]]
