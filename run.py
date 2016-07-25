@@ -14,7 +14,7 @@ mines = 10
 
 lag = 2    # seconds after printing
 
-verbose = False
+verbose = True
 
 # setup and first move ########################
 while True:
