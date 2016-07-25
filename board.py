@@ -71,6 +71,7 @@ class Board():
                 else:
                     print(self.unknown_icon, sep=' ', end=' ')
             print()
+        print('%i/%i remaining' % ((self.mines - self.flagged), self.mines))
         return('')
 
     def move(self, i, j):
