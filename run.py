@@ -12,28 +12,33 @@ rows = 8
 cols = rows
 mines = 10
 
-lag = 2    # seconds after printing
+lag = 1    # seconds after printing
 
 verbose = False
 
 won_games = 0
-total_games = 1
+total_games = 100
 # move_counts = []
 
 for i in range(total_games):
     # move_counter = 0
 
 # setup and first move ########################
-    my_board = Board(rows, cols, mines)
-    prob_mines = initialize_prob_mines(my_board)
+    while True:
+        my_board = Board(rows, cols, mines)
+        prob_mines = initialize_prob_mines(my_board)
 
-    my_board.move(3, 3)
-    prob_mines[3][3] = 0
+        my_board.move(3, 3)
+        prob_mines[3][3] = 0
 
-    if verbose:
-        print('Initial board')
-        print(my_board)
-        sleep(lag)
+        if verbose:
+            print('Initial board')
+            print(my_board)
+            sleep(lag)
+
+        if my_board.reveal(3,3) != my_board.mine_icon:
+            break
+
 
     # gameplay ########################
     while True:
@@ -100,6 +105,7 @@ for i in range(total_games):
 
         if done(my_board):
             won_games += 1
+            break
 
         # move_counts.append(move_counter)
 
@@ -107,4 +113,4 @@ print('Played %i games' % total_games)
 print('Won %i games' % won_games)
 print('Total win percentage: %.1f%%' % (100 * won_games / total_games))
 
-print('Printing expected win percentage for first ten moves')
+# print('Printing expected win percentage for first ten moves')
