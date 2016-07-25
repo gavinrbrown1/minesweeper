@@ -14,6 +14,8 @@ mines = 10
 
 lag = 2    # seconds after printing
 
+verbose = False
+
 # setup and first move ########################
 while True:
     my_board = Board(rows, cols, mines)
@@ -26,12 +28,14 @@ while True:
     if my_board.reveal(3,3) == 0:
         break
 
-print('Initial board')
-print(my_board)
-sleep(lag)
-
+if verbose:
+    print('Initial board')
+    print(my_board)
+    sleep(lag)
 
 # gameplay ########################
+
+
 while True:
     # initial probabilities
     prob_mines = prob_update(prob_mines, my_board)
@@ -45,9 +49,10 @@ while True:
                 # print(my_board)
                 # sleep(lag)
 
-    print('Flagging bombs')
-    print(my_board)
-    sleep(2 * lag)
+    if verbose:
+        print('Flagging bombs')
+        print(my_board)
+        sleep(2 * lag)
 
     # probabilties agains
     prob_mines = prob_update(prob_mines, my_board)
@@ -55,7 +60,8 @@ while True:
     # where is safe? Move there
     prob_mines = safe_spaces(prob_mines, my_board)
 
-    print('Making safe moves')
+    if verbose:
+        print('Making safe moves')
 
     made_moves = False
 
@@ -64,11 +70,13 @@ while True:
             label = my_board.reveal(i, j)
             if prob_mines[i][j] == 0 and label == my_board.unknown_icon:
                 my_board.move(i, j)
-                print(my_board)
-                sleep(lag)
+                if verbose:
+                    print(my_board)
+                    sleep(lag)
 
                 made_moves = True
 
     if not made_moves:
-        print('No moves to make')
+        if verbose:
+            print('No moves to make')
         break

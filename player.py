@@ -138,7 +138,6 @@ def safe_spaces(prob_mines, b):
 
     return prob_mines
 
-
 def print_probs(prob_mines):
     for row in prob_mines:
         for p in row:
@@ -149,6 +148,9 @@ def print_probs(prob_mines):
 def prob_update(prob_mines, b):
     """wrapper for regular updates"""
     prob_mines = uniform_updater(prob_mines, b)
-    prob_mines = bomb_finder(prob_mines, b)
+    if prob_mines:
+        prob_mines = bomb_finder(prob_mines, b)
+    else:
+        return
 
     return(prob_mines)
