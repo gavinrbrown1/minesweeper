@@ -17,9 +17,10 @@ lag = 1    # seconds after printing
 verbose = False
 
 won_games = 0
-total_games = 100
+total_games = 1000
 # move_counts = []
 
+start = time()
 for i in range(total_games):
     # move_counter = 0
 
@@ -109,6 +110,9 @@ for i in range(total_games):
 
         # move_counts.append(move_counter)
 
+end = time()
+
+print(end - start)
 print('Played %i games' % total_games)
 print('Won %i games' % won_games)
 print('Total win percentage: %.1f%%' % (100 * won_games / total_games))
