@@ -3,117 +3,122 @@
 
 from time import sleep, time
 
-from player import initialize_prob_mines, prob_update, player_moves, safe_spaces
+from player import initialize_prob_mines, prob_update, player_moves, safe_spaces, print_probs, pull_neighbors
 from board import Board
 from board_eval import done
 
 # parameters ########################
-rows = 8
-cols = rows
-mines = 10
+rows = 16
+cols = 30
+mines = 99
 
-lag = 1    # seconds after printing
+lag = 0.5    # seconds after printing
 
-verbose = False
+verbose = True
 
 won_games = 0
-total_games = 1000
+total_games = 10
 # move_counts = []
+
+# first moves
+init_row = 3
+init_col = init_row
+
+# setup and first move ########################
 
 start = time()
 for i in range(total_games):
     # move_counter = 0
 
-# setup and first move ########################
-    while True:
-        my_board = Board(rows, cols, mines)
-        prob_mines = initialize_prob_mines(my_board)
+    my_board = Board(rows, cols, mines)
+    prob_mines = initialize_prob_mines(my_board)
 
-        my_board.move(3, 3)
-        prob_mines[3][3] = 0
+    my_board.move(init_row, init_col)
+    prob_mines[init_row][init_col] = 0
 
-        if verbose:
-            print('Initial board')
-            print(my_board)
-            sleep(lag)
+    if verbose:
+        print('Initial board')
+        print(my_board)
+        sleep(lag)
 
-        if my_board.reveal(3,3) != my_board.mine_icon:
-            break
+    if my_board.reveal(init_row, init_col) != my_board.mine_icon:
+        # if we hit a mine on the first go, oh well
 
 
-    # gameplay ########################
-    while True:
-        # initial probabilities
-        prob_mines = prob_update(prob_mines, my_board)
+        # gameplay ########################
+        while True:
+            # initial probabilities
+            prob_mines = prob_update(prob_mines, my_board)
 
-        # start by flagging what we know is bombs
-        for [i, j] in my_board.coords:
-            label = my_board.reveal(i, j)
-            if prob_mines[i][j] == 1 and label != my_board.flag_icon:
-                my_board.flag(i, j)
-                # print(my_board)
-                # sleep(lag)
+            # start by flagging what we know is bombs
+            for [i, j] in my_board.coords:
+                label = my_board.reveal(i, j)
+                if prob_mines[i][j] == 1 and label != my_board.flag_icon:
+                    my_board.flag(i, j)
+                    # print(my_board)
+                    # sleep(lag)
 
-        if verbose:
-            print('Flagging bombs')
-            print(my_board)
-            sleep(lag)
-
-        # probabilties agains
-        prob_mines = prob_update(prob_mines, my_board)
-
-        # where is safe? Move there
-        prob_mines = safe_spaces(prob_mines, my_board)
-
-        if verbose:
-            print('Making safe moves')
-
-        made_moves = False
-
-        for [i, j] in my_board.coords:
-            label = my_board.reveal(i, j)
-            if prob_mines[i][j] == 0 and label == my_board.unknown_icon:
-                my_board.move(i, j)
-                # move_counter += 1
-                if my_board.reveal(i, j) == my_board.mine_icon:
-                    print('fuck')
-                if verbose:
-                    print(my_board)
-                    sleep(lag)
-
-                made_moves = True
-
-        if not made_moves:
             if verbose:
-                print('No safe moves to make')
+                print('Flagging bombs')
+                print(my_board)
+                sleep(lag)
 
-            # pick the first place that we don't know about
-            lost = False
+            # probabilties agains
+            prob_mines = prob_update(prob_mines, my_board)
+
+            # where is safe? Move there
+            prob_mines = safe_spaces(prob_mines, my_board)
+
+            if verbose:
+                print('Making safe moves')
+
+            made_moves = False
 
             for [i, j] in my_board.coords:
-                if my_board.reveal(i, j) == my_board.unknown_icon:
+                label = my_board.reveal(i, j)
+                if prob_mines[i][j] == 0 and label == my_board.unknown_icon:
                     my_board.move(i, j)
+                    # move_counter += 1
+                    if my_board.reveal(i, j) == my_board.mine_icon:
+                        print('fuck, you were sure but still hit a mine')
                     if verbose:
                         print(my_board)
+                        # print_probs(prob_mines)
                         sleep(lag)
-                    if my_board.reveal(i, j) == my_board.mine_icon:
-                        lost = True
+
+                    made_moves = True
+
+            if not made_moves:
+                if verbose:
+                    print('No safe moves to make')
+
+                # pick the first place that we don't know about
+                lost = False
+
+                for [i, j] in my_board.coords:
+                    if my_board.reveal(i, j) == my_board.unknown_icon:
+                        my_board.move(i, j)
+                        if verbose:
+                            print(my_board)
+                            sleep(lag)
+                        if my_board.reveal(i, j) == my_board.mine_icon:
+                            lost = True
+                        break
+
+                if lost:
                     break
 
-            if lost:
+
+            if done(my_board):
+                won_games += 1
                 break
 
-
-        if done(my_board):
-            won_games += 1
-            break
-
-        # move_counts.append(move_counter)
+            # move_counts.append(move_counter)
 
 end = time()
 
-print(end - start)
 print('Played %i games' % total_games)
+print('Took %.1f seconds' % (end - start))
 print('Won %i games' % won_games)
 print('Total win percentage: %.1f%%' % (100 * won_games / total_games))
 

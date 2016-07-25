@@ -38,12 +38,21 @@ def player_moves(prob_mines, b):
 
 def pull_neighbors(i, j, b):
     """function returns a list of neighbors values and their indices"""
+    # print(i, j, b.rows, b.cols)
+
     deltas = [-1, 0, 1]
     output = []
     for di in deltas:
         for dj in deltas:
+            # print(di, dj)
             if (di != 0) or (dj != 0):
-                if i+di>=0 and i+di<b.rows and j+dj>=0 and j+dj<b.rows:
+                # print(i+di, j+dj)
+                # print(i+di>=0)
+                # print(i+di<b.rows)
+                # print(j+dj>=0)
+                # print(j+dj<b.cols)
+                if i+di>=0 and i+di<b.rows and j+dj>=0 and j+dj<b.cols:
+
                     output.append({
                     'label': b.reveal(i+di, j+dj),
                     'i': i+di,
@@ -146,3 +155,7 @@ def prob_update(prob_mines, b):
     prob_mines = bomb_finder(prob_mines, b)
 
     return(prob_mines)
+
+def random_mover(prob_mines, b):
+    """randomly selects a move, returns coordinates"""
+    pass

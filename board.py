@@ -25,6 +25,7 @@ class Board():
 
         # for iterating over coordinates
         self.coords = []
+
         for i in range(self.rows):
             for j in range(self.cols):
                 self.coords.append([i, j])
