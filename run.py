@@ -14,10 +14,10 @@ mines = 99
 
 lag = 1    # seconds after printing
 
-verbose = True
+verbose = False
 
 won_games = 0
-total_games = 10
+total_games = int(10E3)
 # move_counts = []
 
 # first moves
