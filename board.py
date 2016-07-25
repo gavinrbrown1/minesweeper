@@ -31,7 +31,7 @@ class Board():
                 self.coords.append([i, j])
 
         # generate mine locations
-        positions = [[x//rows, x%cols] for x in sample(range(rows*cols), mines)]
+        positions = [[x//cols, x%cols] for x in sample(range(rows*cols), mines)]
 
         # each element of the board has two entries: the first is actual entry
         #   and the second is what the player sees
@@ -71,7 +71,7 @@ class Board():
                 else:
                     print(self.unknown_icon, sep=' ', end=' ')
             print()
-        print('%i/%i remaining' % ((self.mines - self.flagged), self.mines))
+        print('%i/%i mines remaining' % ((self.mines - self.flagged), self.mines))
         return('')
 
     def move(self, i, j):

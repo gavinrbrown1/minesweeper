@@ -3,7 +3,7 @@
 
 from time import sleep, time
 
-from player import initialize_prob_mines, prob_update, player_moves, safe_spaces, print_probs, pull_neighbors
+from player import initialize_prob_mines, prob_update, player_moves, safe_spaces, print_probs, pull_neighbors, uncertain_mover
 from board import Board
 from board_eval import done
 
@@ -12,7 +12,7 @@ rows = 16
 cols = 30
 mines = 99
 
-lag = 0.5    # seconds after printing
+lag = 1    # seconds after printing
 
 verbose = True
 
@@ -21,10 +21,10 @@ total_games = 10
 # move_counts = []
 
 # first moves
-init_row = 3
-init_col = init_row
+init_row = 7
+init_col = 14
 
-# setup and first move ########################
+# setup and gameplay ########################
 
 start = time()
 for i in range(total_games):
@@ -80,7 +80,7 @@ for i in range(total_games):
                     my_board.move(i, j)
                     # move_counter += 1
                     if my_board.reveal(i, j) == my_board.mine_icon:
-                        print('fuck, you were sure but still hit a mine')
+                        print('fuck, you were confident but still hit a mine')
                     if verbose:
                         print(my_board)
                         # print_probs(prob_mines)
@@ -92,18 +92,17 @@ for i in range(total_games):
                 if verbose:
                     print('No safe moves to make')
 
-                # pick the first place that we don't know about
                 lost = False
 
-                for [i, j] in my_board.coords:
-                    if my_board.reveal(i, j) == my_board.unknown_icon:
-                        my_board.move(i, j)
-                        if verbose:
-                            print(my_board)
-                            sleep(lag)
-                        if my_board.reveal(i, j) == my_board.mine_icon:
-                            lost = True
-                        break
+                # returns a choice
+                [i, j] = uncertain_mover(prob_mines, my_board)
+
+                my_board.move(i, j)
+                if verbose:
+                    print(my_board)
+                    sleep(lag)
+                if my_board.reveal(i, j) == my_board.mine_icon:
+                    lost = True
 
                 if lost:
                     break

@@ -156,6 +156,14 @@ def prob_update(prob_mines, b):
 
     return(prob_mines)
 
-def random_mover(prob_mines, b):
-    """randomly selects a move, returns coordinates"""
-    pass
+def uncertain_mover(prob_mines, b):
+    """select a move when not assured it's safe"""
+
+    # for now, pick a random spot that is unknown
+    options = []
+    for [i, j] in b.coords:
+        if b.reveal(i, j) == b.unknown_icon:
+            options.append([i, j])
+
+    [out] = random.sample(options, 1)
+    return(out)
