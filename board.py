@@ -23,6 +23,12 @@ class Board():
         self.flagged = 0
         self.unknowns = self.rows * self.cols
 
+        # for iterating over coordinates
+        self.coords = []
+        for i in range(self.rows):
+            for j in range(self.cols):
+                self.coords.append([i, j])
+
         # generate mine locations
         positions = [[x//rows, x%cols] for x in sample(range(rows*cols), mines)]
 

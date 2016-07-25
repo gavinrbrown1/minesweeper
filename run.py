@@ -5,7 +5,7 @@ from time import sleep, time
 
 from player import initialize_prob_mines, prob_update, player_moves, safe_spaces
 from board import Board
-from board_eval import find_bombs
+from board_eval import done
 
 # parameters ########################
 rows = 8
@@ -14,7 +14,7 @@ mines = 10
 
 lag = 2    # seconds after printing
 
-verbose = False
+verbose = True
 
 # setup and first move ########################
 while True:
@@ -34,19 +34,17 @@ if verbose:
     sleep(lag)
 
 # gameplay ########################
-
 while True:
     # initial probabilities
     prob_mines = prob_update(prob_mines, my_board)
 
     # start by flagging what we know is bombs
-    for i in range(my_board.rows):
-        for j in range(my_board.cols):
-            label = my_board.reveal(i, j)
-            if prob_mines[i][j] == 1 and label != my_board.flag_icon:
-                my_board.flag(i, j)
-                # print(my_board)
-                # sleep(lag)
+    for [i, j] in my_board.coords:
+        label = my_board.reveal(i, j)
+        if prob_mines[i][j] == 1 and label != my_board.flag_icon:
+            my_board.flag(i, j)
+            # print(my_board)
+            # sleep(lag)
 
     if verbose:
         print('Flagging bombs')
@@ -64,18 +62,17 @@ while True:
 
     made_moves = False
 
-    for i in range(my_board.rows):
-        for j in range(my_board.cols):
-            label = my_board.reveal(i, j)
-            if prob_mines[i][j] == 0 and label == my_board.unknown_icon:
-                my_board.move(i, j)
-                if my_board.reveal(i, j) == my_board.mine_icon:
-                    print('fuck')
-                if verbose:
-                    print(my_board)
-                    sleep(lag)
+    for [i, j] in my_board.coords:
+        label = my_board.reveal(i, j)
+        if prob_mines[i][j] == 0 and label == my_board.unknown_icon:
+            my_board.move(i, j)
+            if my_board.reveal(i, j) == my_board.mine_icon:
+                print('fuck')
+            if verbose:
+                print(my_board)
+                sleep(lag)
 
-                made_moves = True
+            made_moves = True
 
     if not made_moves:
         if verbose:
