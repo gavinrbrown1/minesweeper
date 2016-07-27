@@ -94,7 +94,7 @@ def uniform_updater(prob_mines, b):
     return(prob_mines)
 
 def bomb_finder(prob_mines, b):
-    """search for situations where we know p is 1"""
+    """search for situations where we know p is 1 or 0"""
 
     for [i, j] in b.coords:
         label = b.reveal(i, j)
@@ -102,20 +102,28 @@ def bomb_finder(prob_mines, b):
             # then there are  bomb neighbors
             neighbors = pull_neighbors(i, j, b) # list of neighboring spaces
 
-            unknown_neighbors = bomb_neighbors = 0
-            for n in neighbors:
-                if n['label'] == b.unknown_icon:
-                    unknown_neighbors += 1
-                elif prob_mines[n['i']][n['j']] == 1:
-                    bomb_neighbors += 1
+            unknown_neighbors = known_bomb_neighbors = 0
 
-            if (label - bomb_neighbors) == unknown_neighbors:
+            for n in neighbors:
+                p = prob_mines[n['i']][n['j']]
+                if p == 1:
+                    known_bomb_neighbors += 1
+                elif p != 0:
+                    unknown_neighbors += 1
+
+            if (label - known_bomb_neighbors) == unknown_neighbors:
                 # then all the unknown neighbors are bombs!
                 for n in neighbors:
-                    if n['label'] == b.unknown_icon:
+                    if prob_mines[n['i']][n['j']] != 0:
                         prob_mines[n['i']][n['j']] = 1
 
-    return prob_mines
+            elif label == known_bomb_neighbors:
+                # then everything else surrounding is safe
+                for n in neighbors:
+                    if prob_mines[n['i']][n['j']] != 1:
+                        prob_mines[n['i']][n['j']] = 0
+
+    return(prob_mines)
 
 def safe_spaces(prob_mines, b):
     """

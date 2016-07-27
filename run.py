@@ -3,13 +3,13 @@
 
 from time import sleep, time
 
-from player import initialize_prob_mines, prob_update, safe_spaces, move_chooser
+from player import initialize_prob_mines, prob_update, safe_spaces, move_chooser, print_probs
 from board import Board, board_setup
 from board_eval import done
 
 # parameters ########################
 verbose = True
-difficulty = 'hard'     # 'hard' or 'easy'
+difficulty = 'easy'     # 'hard' or 'easy'
 
 won_games = 0
 total_games = 10000
@@ -46,52 +46,48 @@ for i in range(total_games):
             # initial probabilities
             prob_mines = prob_update(prob_mines, my_board)
 
-            # start by flagging what we know is bombs
-            flagged_something = False
+            # start by flagging what we know to be bombs
+            flagged = 0
 
             for [i, j] in my_board.coords:
                 label = my_board.reveal(i, j)
                 if prob_mines[i][j] == 1 and label != my_board.flag_icon:
                     my_board.flag(i, j)
-                    flagged_something = True
+                    flagged += 1
 
-            if verbose and flagged_something:
-                print('Flagging bombs')
+            if verbose and flagged > 0:
+                print('Flagged %i bombs' % flagged)
                 print(my_board)
+                # print_probs(prob_mines)
                 sleep(lag)
 
             # probabilties agains
-            prob_mines = prob_update(prob_mines, my_board)
+            # prob_mines = prob_update(prob_mines, my_board)
 
             # where is safe? Move there
-            prob_mines = safe_spaces(prob_mines, my_board)
+            # prob_mines = safe_spaces(prob_mines, my_board)
 
             moves = move_chooser(prob_mines, my_board)
 
-            if verbose:
-                print('Making %i move(s)' % len(moves))
+            lost = False
 
             for [i, j] in moves:
-                my_board.move(i, j)
+                revealed = my_board.move(i, j)
                 if verbose:
+                    print('Moving')
                     print(my_board)
+                    # print_probs(prob_mines)
                     sleep(lag)
 
-                if my_board.reveal(i, j) == my_board.mine_icon:
-                    break
+                if revealed == my_board.mine_icon:
+                    lost = True
 
-            # if i != -1:
-            #     my_board.move(i, j)
-            #     if verbose:
-            #         print(my_board)
-            #         sleep(lag)
-            #
-            #     if my_board.reveal(i, j) == my_board.mine_icon:
-            #         break
-            #
-            # if done(my_board):
-            #     won_games += 1
-            #     break
+            if lost:
+                break
+
+            if done(my_board):
+                won_games += 1
+                break
 
 end = time()
 

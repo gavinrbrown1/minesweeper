@@ -87,8 +87,10 @@ class Board():
         print('%i/%i mines remaining' % ((self.mines - self.flagged), self.mines))
         return('')
 
-    def move(self, i, j):
+    def move(self, x, y):
         """update the board with the selection at row, col"""
+
+        i, j = x, y
 
         # use a queue of all the spots we will reveal
         queue = [[i, j]]
@@ -110,6 +112,8 @@ class Board():
             self.board[i][j][1] = self.board[i][j][0]
 
         self.unknowns -= len(queue)
+
+        return(self.reveal(x, y))
 
     def flag(self, i, j):
         """update the board with flag"""
