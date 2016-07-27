@@ -96,6 +96,8 @@ def uniform_updater(prob_mines, b):
 def bomb_finder(prob_mines, b):
     """search for situations where we know p is 1 or 0"""
 
+    changed = False
+
     for [i, j] in b.coords:
         label = b.reveal(i, j)
         if label in list(range(1, 9)):
@@ -114,41 +116,21 @@ def bomb_finder(prob_mines, b):
             if (label - known_bomb_neighbors) == unknown_neighbors:
                 # then all the unknown neighbors are bombs!
                 for n in neighbors:
-                    if prob_mines[n['i']][n['j']] != 0:
+                    if prob_mines[n['i']][n['j']] not in [0, 1]:
                         prob_mines[n['i']][n['j']] = 1
+                        changed = True
 
             elif label == known_bomb_neighbors:
                 # then everything else surrounding is safe
                 for n in neighbors:
-                    if prob_mines[n['i']][n['j']] != 1:
+                    if prob_mines[n['i']][n['j']] not in [0, 1]:
                         prob_mines[n['i']][n['j']] = 0
+                        changed = True
+
+    if changed:
+        prob_mines = bomb_finder(prob_mines, b)
 
     return(prob_mines)
-
-def safe_spaces(prob_mines, b):
-    """
-    The places we know are not bombs.
-    Possibly can be combined with bomb_finder - but need to debug!
-    """
-    for [i, j] in b.coords:
-        label = b.reveal(i, j)
-        if label in list(range(1, 9)):
-            # then there are bomb neighbors
-            neighbors = pull_neighbors(i, j, b) # list of neighboring spaces
-
-            bomb_neighbors = 0
-
-            for n in neighbors:
-                if prob_mines[n['i']][n['j']] == 1:
-                    bomb_neighbors += 1
-
-            if label == bomb_neighbors:
-                # then everything else surrounding is safe
-                for n in neighbors:
-                    if prob_mines[n['i']][n['j']] != 1:
-                        prob_mines[n['i']][n['j']] = 0
-
-    return prob_mines
 
 def print_probs(prob_mines):
     for row in prob_mines:

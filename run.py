@@ -3,20 +3,20 @@
 
 from time import sleep, time
 
-from player import initialize_prob_mines, prob_update, safe_spaces, move_chooser, print_probs
+from player import initialize_prob_mines, prob_update, move_chooser
 from board import Board, board_setup
 from board_eval import done
 
 # parameters ########################
-verbose = True
-difficulty = 'easy'     # 'hard' or 'easy'
+verbose = False
+difficulty = 'hard'     # 'hard' or 'easy'
 
 won_games = 0
-total_games = 10000
+total_games = 1000
 
 [rows, cols, mines, init_row, init_col] = board_setup(difficulty)
 
-lag = 1    # seconds after printing
+lag = 0.5   # seconds after printing
 
 # setup and gameplay ########################
 
@@ -68,6 +68,7 @@ for i in range(total_games):
             # prob_mines = safe_spaces(prob_mines, my_board)
 
             moves = move_chooser(prob_mines, my_board)
+            x = len(moves)
 
             lost = False
 
@@ -81,6 +82,8 @@ for i in range(total_games):
 
                 if revealed == my_board.mine_icon:
                     lost = True
+                    if x > 1:
+                        print('shit')
 
             if lost:
                 break
