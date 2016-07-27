@@ -165,5 +165,19 @@ def uncertain_mover(prob_mines, b):
         if b.reveal(i, j) == b.unknown_icon:
             options.append([i, j])
 
-    [out] = random.sample(options, 1)
+    try:
+        [out] = random.sample(options, 1)
+    except ValueError:
+        # print("Error: you want to go, but the game is over!")
+        return([-1, -1])
+
     return(out)
+
+def move_chooser(prob_mines, b):
+    """return a move for the player"""
+    for [i, j] in b.coords:
+        if prob_mines[i][j] == 0 and b.reveal(i, j) == b.unknown_icon:
+            return([i, j])
+
+    # no clear choices left
+    return(uncertain_mover(prob_mines, b))

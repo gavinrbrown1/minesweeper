@@ -3,7 +3,7 @@
 
 from time import sleep, time
 
-from player import initialize_prob_mines, prob_update, player_moves, safe_spaces, print_probs, pull_neighbors, uncertain_mover
+from player import initialize_prob_mines, prob_update, safe_spaces, move_chooser
 from board import Board
 from board_eval import done
 
@@ -17,7 +17,7 @@ lag = 1    # seconds after printing
 verbose = False
 
 won_games = 0
-total_games = int(10E3)
+total_games = 1000
 # move_counts = []
 
 # first moves
@@ -42,7 +42,9 @@ for i in range(total_games):
         sleep(lag)
 
     if my_board.reveal(init_row, init_col) != my_board.mine_icon:
+
         # if we hit a mine on the first go, oh well
+        # otherwise, let's play!
 
 
         # gameplay ########################
@@ -51,14 +53,15 @@ for i in range(total_games):
             prob_mines = prob_update(prob_mines, my_board)
 
             # start by flagging what we know is bombs
+            flagged_something = False
+
             for [i, j] in my_board.coords:
                 label = my_board.reveal(i, j)
                 if prob_mines[i][j] == 1 and label != my_board.flag_icon:
                     my_board.flag(i, j)
-                    # print(my_board)
-                    # sleep(lag)
+                    flagged_something = True
 
-            if verbose:
+            if verbose and flagged_something:
                 print('Flagging bombs')
                 print(my_board)
                 sleep(lag)
@@ -70,49 +73,22 @@ for i in range(total_games):
             prob_mines = safe_spaces(prob_mines, my_board)
 
             if verbose:
-                print('Making safe moves')
+                print('Making a move')
 
-            made_moves = False
+            [i, j] = move_chooser(prob_mines, my_board)
 
-            for [i, j] in my_board.coords:
-                label = my_board.reveal(i, j)
-                if prob_mines[i][j] == 0 and label == my_board.unknown_icon:
-                    my_board.move(i, j)
-                    # move_counter += 1
-                    if my_board.reveal(i, j) == my_board.mine_icon:
-                        print('fuck, you were confident but still hit a mine')
-                    if verbose:
-                        print(my_board)
-                        # print_probs(prob_mines)
-                        sleep(lag)
-
-                    made_moves = True
-
-            if not made_moves:
-                if verbose:
-                    print('No safe moves to make')
-
-                lost = False
-
-                # returns a choice
-                [i, j] = uncertain_mover(prob_mines, my_board)
-
+            if i != -1:
                 my_board.move(i, j)
                 if verbose:
                     print(my_board)
                     sleep(lag)
+
                 if my_board.reveal(i, j) == my_board.mine_icon:
-                    lost = True
-
-                if lost:
                     break
-
 
             if done(my_board):
                 won_games += 1
                 break
-
-            # move_counts.append(move_counter)
 
 end = time()
 
