@@ -4,25 +4,19 @@
 from time import sleep, time
 
 from player import initialize_prob_mines, prob_update, safe_spaces, move_chooser
-from board import Board
+from board import Board, board_setup
 from board_eval import done
 
 # parameters ########################
-rows = 16
-cols = 30
-mines = 99
-
-lag = 1    # seconds after printing
-
-verbose = False
+verbose = True
+difficulty = 'hard'     # 'hard' or 'easy'
 
 won_games = 0
-total_games = 1000
-# move_counts = []
+total_games = 10000
 
-# first moves
-init_row = 7
-init_col = 14
+[rows, cols, mines, init_row, init_col] = board_setup(difficulty)
+
+lag = 1    # seconds after printing
 
 # setup and gameplay ########################
 
@@ -72,12 +66,12 @@ for i in range(total_games):
             # where is safe? Move there
             prob_mines = safe_spaces(prob_mines, my_board)
 
+            moves = move_chooser(prob_mines, my_board)
+
             if verbose:
-                print('Making a move')
+                print('Making %i move(s)' % len(moves))
 
-            [i, j] = move_chooser(prob_mines, my_board)
-
-            if i != -1:
+            for [i, j] in moves:
                 my_board.move(i, j)
                 if verbose:
                     print(my_board)
@@ -86,9 +80,18 @@ for i in range(total_games):
                 if my_board.reveal(i, j) == my_board.mine_icon:
                     break
 
-            if done(my_board):
-                won_games += 1
-                break
+            # if i != -1:
+            #     my_board.move(i, j)
+            #     if verbose:
+            #         print(my_board)
+            #         sleep(lag)
+            #
+            #     if my_board.reveal(i, j) == my_board.mine_icon:
+            #         break
+            #
+            # if done(my_board):
+            #     won_games += 1
+            #     break
 
 end = time()
 

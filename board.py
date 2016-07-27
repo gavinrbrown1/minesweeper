@@ -4,6 +4,19 @@
 
 from random import sample
 
+def board_setup(difficulty):
+    """
+    Return parameters to initialize the game
+    [rows, cols, mines, init_row, init_col]
+    """
+    if difficulty == 'hard':
+        return([16, 30, 99, 7, 14])
+    elif difficulty == 'easy':
+        return([8, 8, 10, 3, 3])
+    else:
+        print('Incorrect difficulty specified, must be \'hard\' or \'easy\'')
+
+
 class Board():
 
     def __init__(self, rows, cols, mines):

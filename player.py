@@ -175,9 +175,14 @@ def uncertain_mover(prob_mines, b):
 
 def move_chooser(prob_mines, b):
     """return a move for the player"""
+    safe_moves = []
+
     for [i, j] in b.coords:
         if prob_mines[i][j] == 0 and b.reveal(i, j) == b.unknown_icon:
-            return([i, j])
+            safe_moves.append([i, j])
+
+    if safe_moves:
+        return(safe_moves)
 
     # no clear choices left
-    return(uncertain_mover(prob_mines, b))
+    return([uncertain_mover(prob_mines, b)])
