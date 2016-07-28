@@ -8,7 +8,7 @@ from board import Board, board_setup
 from board_eval import done
 
 # parameters ########################
-verbose = False
+verbose = True
 difficulty = 'hard'     # 'hard' or 'easy'
 
 won_games = 0
@@ -73,17 +73,18 @@ for i in range(total_games):
             lost = False
 
             for [i, j] in moves:
-                revealed = my_board.move(i, j)
-                if verbose:
-                    print('Moving')
-                    print(my_board)
-                    # print_probs(prob_mines)
-                    sleep(lag)
+                if my_board.reveal(i, j) == my_board.unknown_icon:
+                    revealed = my_board.move(i, j)
+                    if verbose:
+                        print('Moving')
+                        print(my_board)
+                        # print_probs(prob_mines)
+                        sleep(lag)
 
-                if revealed == my_board.mine_icon:
-                    lost = True
-                    if x > 1:
-                        print('shit')
+                    if revealed == my_board.mine_icon:
+                        lost = True
+                        if x > 1:
+                            print('shit')
 
             if lost:
                 break

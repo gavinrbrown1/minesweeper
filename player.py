@@ -68,6 +68,7 @@ def uniform_updater(prob_mines, b):
     # count places we think are mines and unknown locations
     found_mines = 0
     unknowns = 0
+
     for [i, j] in b.coords:
         if prob_mines[i][j] not in [0, 1]:
             unknowns += 1
@@ -77,8 +78,7 @@ def uniform_updater(prob_mines, b):
     try:
         p = (total_mines - found_mines) / unknowns
     except ZeroDivisionError:
-        pass
-
+        p = 0
 
     # iterate over everything
     for [i, j] in b.coords:
