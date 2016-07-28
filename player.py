@@ -135,24 +135,94 @@ def bomb_finder(prob_mines, b):
 def print_probs(prob_mines):
     for row in prob_mines:
         for p in row:
-            print('%0.1f' % p, end=' ')
+            print('%0.2f' % p, end=' ')
         print()
     print()
 
 def prob_update(prob_mines, b):
     """wrapper for regular updates"""
     prob_mines = uniform_updater(prob_mines, b)
+
+    original = [x for x in prob_mines]
+
     prob_mines = bomb_finder(prob_mines, b)
 
+    if original == prob_mines:  # no 100% certainties
+        print('hola')
+        print_probs(prob_mines)
+
+        prob_mines = simple_prob_calculations(prob_mines, b)
+        print_probs(prob_mines)
+
     return(prob_mines)
+
+def simple_prob_calculations(prob_mines, b):
+    """update probabilities if no revealed spaces are interacting"""
+    interaction = False
+    mines_tracked = 0   # counts mines near revealed spaces
+    neighbor_spaces = 0 # counts spaces surrounding revealed spaces
+    revealed_spaces = 0
+
+    print('We are inside the function now')
+
+    # first, check for interactions anywhere on the board
+    for [i, j] in b.coords:
+
+        neighbors = pull_neighbors(i, j, b)
+
+        label = b.reveal(i, j)
+
+        if label in range(1, 9):
+            mines_tracked += label
+            neighbor_spaces += len(neighbors)
+            revealed_spaces += 1
+
+        for n in neighbors:
+            extended_neighbors = pull_neighbors(n['i'], n['j'], b)
+            for e in extended_neighbors:
+                if e['i'] != i or e['j'] != j:
+                    if b.reveal(e['i'], e['j']) != b.unknown_icon:
+                        interaction = True
+
+    if interaction:
+        print('Exiting at line 186')
+        return(prob_mines)
+
+    # if no interactions, assign exact probabilities
+    untracked_mines = b.mines - mines_tracked
+    non_neighbor_spaces = b.rows * b.cols - neighbor_spaces - revealed_spaces
+    p_base = untracked_mines / non_neighbor_spaces
+    print('p_base is %.2f' % p_base)
+
+    for [i, j] in b.coords:
+        if prob_mines[i][j] not in [0, 1]:
+            prob_mines[i][j] = p_base
+
+    for [i, j] in b.coords:
+        label = b.reveal(i, j)
+        if label in range(1, 9):
+            neighbors = pull_neighbors(i, j, b)
+            n_count = len(neighbors)
+            for n in neighbors:
+                prob_mines[n['i']][n['j']] = label / n(count)
+
+    return(prob_mines)
+
 
 def uncertain_mover(prob_mines, b):
     """select a move when not assured it's safe"""
 
-    # for now, pick a random spot that is unknown
+    # determine the minimum probability on the board
+    lo = 1
+    for [i, j] in b.coords:
+        p = prob_mines[i][j]
+        if p > 0 and p < lo:
+            lo = p
+
+    # for now, pick an unknown random spot with lowest mine probability
     options = []
     for [i, j] in b.coords:
-        if b.reveal(i, j) == b.unknown_icon:
+        if b.reveal(i, j) == b.unknown_icon and prob_mines[i][j] == p:
             options.append([i, j])
 
     try:

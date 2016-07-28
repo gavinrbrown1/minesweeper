@@ -9,14 +9,14 @@ from board_eval import done
 
 # parameters ########################
 verbose = True
-difficulty = 'hard'     # 'hard' or 'easy'
+difficulty = 'easy'     # 'hard' or 'easy'
 
 won_games = 0
 total_games = 1000
 
 [rows, cols, mines, init_row, init_col] = board_setup(difficulty)
 
-lag = 0.5   # seconds after printing
+lag = 2   # seconds after printing
 
 # setup and gameplay ########################
 
@@ -39,7 +39,6 @@ for i in range(total_games):
 
         # if we hit a mine on the first go, oh well
         # otherwise, let's play!
-
 
         # gameplay ########################
         while True:
