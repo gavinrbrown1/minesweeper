@@ -36,21 +36,15 @@ def player_moves(prob_mines, b):
 
     return(moves)
 
-def pull_neighbors(i, j, b):
+def pull_neighbors(i, j, b, dist=1):
     """function returns a list of neighbors values and their indices"""
     # print(i, j, b.rows, b.cols)
 
-    deltas = [-1, 0, 1]
+    deltas = range(-dist, dist+1)
     output = []
     for di in deltas:
         for dj in deltas:
-            # print(di, dj)
             if (di != 0) or (dj != 0):
-                # print(i+di, j+dj)
-                # print(i+di>=0)
-                # print(i+di<b.rows)
-                # print(j+dj>=0)
-                # print(j+dj<b.cols)
                 if i+di>=0 and i+di<b.rows and j+dj>=0 and j+dj<b.cols:
 
                     output.append({
@@ -58,6 +52,7 @@ def pull_neighbors(i, j, b):
                     'i': i+di,
                     'j': j+dj
                     })
+
     return(output)
 
 def uniform_updater(prob_mines, b):
@@ -147,12 +142,9 @@ def prob_update(prob_mines, b):
 
     prob_mines = bomb_finder(prob_mines, b)
 
-    if original == prob_mines:  # no 100% certainties
-        print('hola')
-        print_probs(prob_mines)
 
+    if original == prob_mines:  # no 100% certainties found
         prob_mines = simple_prob_calculations(prob_mines, b)
-        print_probs(prob_mines)
 
     return(prob_mines)
 
@@ -160,39 +152,32 @@ def simple_prob_calculations(prob_mines, b):
     """update probabilities if no revealed spaces are interacting"""
     interaction = False
     mines_tracked = 0   # counts mines near revealed spaces
-    neighbor_spaces = 0 # counts spaces surrounding revealed spaces
     revealed_spaces = 0
-
-    print('We are inside the function now')
 
     # first, check for interactions anywhere on the board
     for [i, j] in b.coords:
 
-        neighbors = pull_neighbors(i, j, b)
+        neighbors = pull_neighbors(i, j, b, dist=2)
 
         label = b.reveal(i, j)
 
         if label in range(1, 9):
             mines_tracked += label
-            neighbor_spaces += len(neighbors)
             revealed_spaces += 1
+            neighbor_spaces = len(pull_neighbors(i, j, b, dist=1))
 
-        for n in neighbors:
-            extended_neighbors = pull_neighbors(n['i'], n['j'], b)
-            for e in extended_neighbors:
-                if e['i'] != i or e['j'] != j:
-                    if b.reveal(e['i'], e['j']) != b.unknown_icon:
-                        interaction = True
+            for n in neighbors:
+                if b.reveal(n['i'], n['j']) != b.unknown_icon:
+                    interaction = True
+                    break
 
     if interaction:
-        print('Exiting at line 186')
         return(prob_mines)
 
     # if no interactions, assign exact probabilities
     untracked_mines = b.mines - mines_tracked
     non_neighbor_spaces = b.rows * b.cols - neighbor_spaces - revealed_spaces
     p_base = untracked_mines / non_neighbor_spaces
-    print('p_base is %.2f' % p_base)
 
     for [i, j] in b.coords:
         if prob_mines[i][j] not in [0, 1]:
@@ -204,7 +189,7 @@ def simple_prob_calculations(prob_mines, b):
             neighbors = pull_neighbors(i, j, b)
             n_count = len(neighbors)
             for n in neighbors:
-                prob_mines[n['i']][n['j']] = label / n(count)
+                prob_mines[n['i']][n['j']] = label / n_count
 
     return(prob_mines)
 

@@ -16,7 +16,7 @@ total_games = 1000
 
 [rows, cols, mines, init_row, init_col] = board_setup(difficulty)
 
-lag = 2   # seconds after printing
+lag = 3  # seconds after printing
 
 # setup and gameplay ########################
 
