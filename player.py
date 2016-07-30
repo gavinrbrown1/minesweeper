@@ -8,26 +8,16 @@ from time import sleep
 
 from board import Board
 
-def initialize_prob_mines(b):
-    """return uniform probability estimate"""
-    # p = mines / (rows * cols)
-    prob_mines = []
-    for i in range(b.rows):
-         prob_mines.append([])
-         for j in range(b.cols):
-             prob_mines[i].append(0.1)
-    return(prob_mines)
-
 # temporary, only returns safe moves
 def player_moves(prob_mines, b):
     """return a move with lowest bomb probability"""
     min_p = 0   # TEMPORARY
-    # min_p = 1 # actual
+
     moves = []
 
     for [i, j] in b.coords:
         if b.reveal(i, j) == b.unknown_icon:
-            p = prob_mines[i][j]
+            p = prob_mines.show(i, j)
             if p < min_p and p != -1:
                 moves = [[i,j]]
                 min_p = p
@@ -65,9 +55,9 @@ def uniform_updater(prob_mines, b):
     unknowns = 0
 
     for [i, j] in b.coords:
-        if prob_mines[i][j] not in [0, 1]:
+        if prob_mines.show(i, j) not in [0, 1]:
             unknowns += 1
-        elif prob_mines[i][j] == 1:
+        elif prob_mines.show(i, j) == 1:
             found_mines += 1
 
     try:
@@ -77,14 +67,14 @@ def uniform_updater(prob_mines, b):
 
     # iterate over everything
     for [i, j] in b.coords:
-        if prob_mines[i][j] not in [0, 1]:
+        if prob_mines.show(i, j) not in [0, 1]:
             label = b.reveal(i, j)
             if label == b.empty_icon:
-                prob_mines[i][j] = 0
+                prob_mines.set(i, j, 0)
             elif label in range(10):
-                prob_mines[i][j] = 0
+                prob_mines.set(i, j, 0)
             elif label == b.unknown_icon:
-                prob_mines[i][j] = p
+                prob_mines.set(i, j, p)
 
     return(prob_mines)
 
@@ -102,7 +92,7 @@ def bomb_finder(prob_mines, b):
             unknown_neighbors = known_bomb_neighbors = 0
 
             for n in neighbors:
-                p = prob_mines[n['i']][n['j']]
+                p = prob_mines.show(n['i'], n['j'])
                 if p == 1:
                     known_bomb_neighbors += 1
                 elif p != 0:
@@ -111,15 +101,15 @@ def bomb_finder(prob_mines, b):
             if (label - known_bomb_neighbors) == unknown_neighbors:
                 # then all the unknown neighbors are bombs!
                 for n in neighbors:
-                    if prob_mines[n['i']][n['j']] not in [0, 1]:
-                        prob_mines[n['i']][n['j']] = 1
+                    if prob_mines.show(n['i'], n['j']) not in [0, 1]:
+                        prob_mines.set(n['i'], n['j'], 1)
                         changed = True
 
             elif label == known_bomb_neighbors:
                 # then everything else surrounding is safe
                 for n in neighbors:
-                    if prob_mines[n['i']][n['j']] not in [0, 1]:
-                        prob_mines[n['i']][n['j']] = 0
+                    if prob_mines.show(n['i'], n['j']) not in [0, 1]:
+                        prob_mines.set(n['i'], n['j'], 0)
                         changed = True
 
     if changed:
@@ -127,24 +117,16 @@ def bomb_finder(prob_mines, b):
 
     return(prob_mines)
 
-def print_probs(prob_mines):
-    for row in prob_mines:
-        for p in row:
-            print('%0.2f' % p, end=' ')
-        print()
-    print()
-
 def prob_update(prob_mines, b):
     """wrapper for regular updates"""
     prob_mines = uniform_updater(prob_mines, b)
 
-    original = [x for x in prob_mines]
+    # original = [x for x in prob_mines]
 
     prob_mines = bomb_finder(prob_mines, b)
 
-
-    if original == prob_mines:  # no 100% certainties found
-        prob_mines = simple_prob_calculations(prob_mines, b)
+    # if original == prob_mines:  # no 100% certainties found
+    #     prob_mines = simple_prob_calculations(prob_mines, b)
 
     return(prob_mines)
 
@@ -193,21 +175,23 @@ def simple_prob_calculations(prob_mines, b):
 
     return(prob_mines)
 
-
 def uncertain_mover(prob_mines, b):
     """select a move when not assured it's safe"""
 
-    # determine the minimum probability on the board
+    # determine the minimum nonzero probability on the board
     lo = 1
     for [i, j] in b.coords:
-        p = prob_mines[i][j]
+        p = prob_mines.show(i, j)
         if p > 0 and p < lo:
             lo = p
+
+    # print_probs(prob_mines)
+    # print('lowest probability is %0.2f' % lo)
 
     # for now, pick an unknown random spot with lowest mine probability
     options = []
     for [i, j] in b.coords:
-        if b.reveal(i, j) == b.unknown_icon and prob_mines[i][j] == p:
+        if b.reveal(i, j) == b.unknown_icon and prob_mines.show(i, j) == lo:
             options.append([i, j])
 
     try:
@@ -223,7 +207,7 @@ def move_chooser(prob_mines, b):
     safe_moves = []
 
     for [i, j] in b.coords:
-        if prob_mines[i][j] == 0 and b.reveal(i, j) == b.unknown_icon:
+        if prob_mines.show(i, j) == 0 and b.reveal(i, j) == b.unknown_icon:
             safe_moves.append([i, j])
 
     if safe_moves:

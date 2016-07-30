@@ -3,9 +3,9 @@
 
 from time import sleep, time
 
-from player import initialize_prob_mines, prob_update, move_chooser
+from player import prob_update, move_chooser
 from board import Board, board_setup
-from board_eval import done
+from board_eval import done, ProbMines
 
 # parameters ########################
 verbose = True
@@ -16,7 +16,7 @@ total_games = 1000
 
 [rows, cols, mines, init_row, init_col] = board_setup(difficulty)
 
-lag = 3  # seconds after printing
+lag = 0.5  # seconds after printing
 
 # setup and gameplay ########################
 
@@ -25,10 +25,10 @@ for i in range(total_games):
     # move_counter = 0
 
     my_board = Board(rows, cols, mines)
-    prob_mines = initialize_prob_mines(my_board)
+    prob_mines = ProbMines(my_board)
 
     my_board.move(init_row, init_col)
-    prob_mines[init_row][init_col] = 0
+    prob_mines.set(init_row, init_col, 0)
 
     if verbose:
         print('Initial board')
@@ -50,7 +50,7 @@ for i in range(total_games):
 
             for [i, j] in my_board.coords:
                 label = my_board.reveal(i, j)
-                if prob_mines[i][j] == 1 and label != my_board.flag_icon:
+                if prob_mines.show(i,j)==1 and label != my_board.flag_icon:
                     my_board.flag(i, j)
                     flagged += 1
 
@@ -59,12 +59,6 @@ for i in range(total_games):
                 print(my_board)
                 # print_probs(prob_mines)
                 sleep(lag)
-
-            # probabilties agains
-            # prob_mines = prob_update(prob_mines, my_board)
-
-            # where is safe? Move there
-            # prob_mines = safe_spaces(prob_mines, my_board)
 
             moves = move_chooser(prob_mines, my_board)
             x = len(moves)
