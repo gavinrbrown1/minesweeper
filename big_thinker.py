@@ -1,5 +1,7 @@
 # ok, let's figure this whole thing out
 
+from math import factorial
+
 from player import pull_neighbors
 
 # let's for now operate under the rule that we will always move
@@ -48,3 +50,63 @@ def legal(board, locations):
 #   in the edge space, but we should be able to put bounds on it
 
 # Let's make a function to return the indices for spaces that are on the edge
+
+def edges(board):
+    """return list of undiscovered spaces next to discovered spaces"""
+    edges = []
+
+    for [i, j] in b.coords:
+        if board.reveal(i, j) not in range(1, 9):
+            neighbors = pull_neighbors(i, j, b)
+
+    pass
+
+
+# Now like I mentioned before, I think it will be useful to bound the number of
+#   mines that exist in the edges. Not sure exactly how to do this, but let's
+#   save space for two functions that will return the upper and lower bounds for
+#   the edge spaces. We can return (bad but correct) bounds right now.
+
+def lower_bound(board, edges):
+    """bound the number of mines in the edge spaces"""
+    hi = 0
+
+    for e in edges:
+        i, j = e[0], e[1]
+        neighbors = pull_neighbors(i, j, board)
+        for n in neighbors:
+            if n['label'] > hi:
+                hi = n['label']
+
+    return(hi)
+
+def upper_bound(board, edges):
+    """bound the number of mines in the edge spaces"""
+
+    count = 0
+
+    for e in edges:
+        i, j = e[0], e[1]
+        neighbors = pull_neighbors(i, j, board)
+        for n in neighbors:
+            if n['label'] in range(1, 9):
+                count += n['label']
+
+    return(min(board.mines, count, len(edges)))
+
+# well, now we're getting somewhere! Before we get all crazy with enumerating
+#   the legal allocations, we should try to calculate how long that list'll be
+#   (before we account for legality)
+
+def count_possibilties(board, edges):
+    lo = lower_bound(board, edges)
+    hi = upper_bound(board, edges)
+
+    count = 0
+
+    n = len(edges)
+
+    for k in range(lo, hi+1):
+        count += factorial(n) / (factorial(k) * factorial(n - k))
+
+    return(count)
