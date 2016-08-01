@@ -6,6 +6,7 @@ from time import sleep, time
 from player import prob_update, move_chooser
 from board import Board, board_setup
 from board_eval import done, ProbMines
+from big_thinker import count_possibilties
 
 # parameters ########################
 verbose = True
@@ -16,7 +17,7 @@ total_games = 1000
 
 [rows, cols, mines, init_row, init_col] = board_setup(difficulty)
 
-lag = 0.5  # seconds after printing
+lag = 2  # seconds after printing
 
 # setup and gameplay ########################
 
@@ -33,6 +34,10 @@ for i in range(total_games):
     if verbose:
         print('Initial board')
         print(my_board)
+
+        x = count_possibilties(my_board)
+        print('Simulate %i positions' % x)
+
         sleep(lag)
 
     if my_board.reveal(init_row, init_col) != my_board.mine_icon:
@@ -71,7 +76,10 @@ for i in range(total_games):
                     if verbose:
                         print('Moving')
                         print(my_board)
-                        # print_probs(prob_mines)
+
+                        x = count_possibilties(my_board)
+                        print('Simulate %i positions' % x)
+                        
                         sleep(lag)
 
                     if revealed == my_board.mine_icon:

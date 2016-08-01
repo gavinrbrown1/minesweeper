@@ -38,7 +38,7 @@ def legal(board, locations):
 
 # now, it's obviously infeasbile to simulate every possible bomb distribution.
 #   There are 64! / (10! * 54!) ways to distribute the bombs. It's a large
-#   (although not astronomical) number, and we don't want to work with it.
+#   (although not astronomical) number, and we don't want to work with itself.
 # We can be thankful for two things. Firstly, that number comes down very
 #   quickly as the game progresses. Secondly, we don't actually have to worry
 #   about the entire board! We can divide the board up into three sections:
@@ -55,11 +55,16 @@ def edges(board):
     """return list of undiscovered spaces next to discovered spaces"""
     edges = []
 
-    for [i, j] in b.coords:
+    for [i, j] in board.coords:
         if board.reveal(i, j) not in range(1, 9):
-            neighbors = pull_neighbors(i, j, b)
+            neighbors = pull_neighbors(i, j, board)
 
-    pass
+            for n in neighbors:
+                if board.reveal(n['i'], n['j']) in range(1,9):
+                    edges.append([i,j])
+                    break
+
+    return(edges)
 
 
 # Now like I mentioned before, I think it will be useful to bound the number of
@@ -75,7 +80,7 @@ def lower_bound(board, edges):
         i, j = e[0], e[1]
         neighbors = pull_neighbors(i, j, board)
         for n in neighbors:
-            if n['label'] > hi:
+            if n['label'] in range(0,9) and n['label'] > hi:
                 hi = n['label']
 
     return(hi)
@@ -98,15 +103,49 @@ def upper_bound(board, edges):
 #   the legal allocations, we should try to calculate how long that list'll be
 #   (before we account for legality)
 
-def count_possibilties(board, edges):
-    lo = lower_bound(board, edges)
-    hi = upper_bound(board, edges)
+def count_possibilties(board):
+    E = edges(board)
+
+    lo = lower_bound(board, E)
+    hi = upper_bound(board, E)
 
     count = 0
 
-    n = len(edges)
+    n = len(E)
 
     for k in range(lo, hi+1):
         count += factorial(n) / (factorial(k) * factorial(n - k))
 
     return(count)
+
+# ok, before we get into the sampling and probabilistic stuff, let's try one
+#   more thing to check definitively
+# want to rule out any spaces we can, answer: is is possible there is a
+#   bomb at this location? All we need to do is produce one legal position with
+#   a bomb at edge [i, j], which may or may not be difficult.
+
+# let's do this.
+def any_legal(i, j, E, board):
+    """returns True if there is a legal position with a bomb at that location"""
+
+    # base cases
+    if [i, j] not in E:
+        return(True)
+    if board.reveal(i, j) == board.flag_icon:
+        return(True)
+    if board.reveal(i, j) != board.unknown_icon:
+        return(False)
+
+    # subset the edges; only keep edges that might influence the space in
+    #   question
+
+
+    return(False)
+
+
+def keep_revelant(i, j, E, board):
+    """
+    Return list of edges that may interact with the specified edge i, j.
+    Note: [i, j] not in returned list.
+    """
+    pass
